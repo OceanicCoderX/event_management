@@ -1,0 +1,101 @@
+/* ---- STUDENT NAVBAR ---- */
+.student-navbar {
+  background: var(--primary);
+  box-shadow: 0 2px 15px rgba(45,0,80,0.3);
+}
+
+.student-navbar .navbar-brand { color: var(--gold) !important; font-weight: 700; }
+.student-navbar .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
+.student-navbar .nav-link:hover, .student-navbar .nav-link.active { color: var(--gold) !important; }
+
+/* ---- STUDENT PAGES ---- */
+.student-hero {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  padding: 2.5rem 0;
+  color: white;
+}
+
+/* ---- EVENT CARDS ---- */
+.event-card {
+  border-radius: 14px;
+  overflow: hidden;
+  background: white;
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: none;
+}
+
+.event-card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(123,47,190,0.2); }
+
+.event-card-header {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  padding: 1.5rem;
+  color: white; text-align: center;
+  font-size: 2.5rem;
+}
+
+.event-card .card-body { padding: 1.25rem; }
+.event-card .event-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* ---- PARTICIPANT GALLERY ---- */
+.participant-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+.participant-gallery-card {
+  border-radius: 12px; overflow: hidden;
+  background: white; box-shadow: var(--card-shadow);
+  transition: var(--transition); text-align: center;
+}
+
+.participant-gallery-card:hover { transform: translateY(-4px); }
+.participant-gallery-card img { width: 100%; height: 160px; object-fit: cover; }
+.participant-gallery-card .card-body { padding: 1rem; }
+
+/* ---- VOTE CARD ---- */
+.vote-card {
+  border-radius: 14px; background: white;
+  box-shadow: var(--card-shadow); overflow: hidden;
+  transition: var(--transition);
+}
+
+.vote-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(123,47,190,0.2); }
+
+.vote-card img {
+  width: 100%; height: 200px; object-fit: cover;
+}
+
+.vote-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: rgba(123,47,190,0.1); color: var(--accent);
+  padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem;
+}
+
+/* ---- LEADERBOARD TABLE ---- */
+.leaderboard-table { border-collapse: separate; border-spacing: 0 4px; }
+.leaderboard-table tbody tr { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 8px; }
+.leaderboard-table tbody tr td:first-child { border-radius: 8px 0 0 8px; }
+.leaderboard-table tbody tr td:last-child { border-radius: 0 8px 8px 0; }
+
+.rank-badge {
+  width: 32px; height: 32px;
+  border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem;
+}
+.rank-1 { background: var(--gold); color: var(--primary); }
+.rank-2 { background: #C0C0C0; color: #333; }
+.rank-3 { background: #CD7F32; color: white; }
+.rank-other { background: #e9ecef; color: #555; }
+
+/* ---- RESULT SCORES ---- */
+.score-pill {
+  display: inline-block; padding: 0.2rem 0.7rem;
+  border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+}
+
+/* ---- RESPONSIVE GALLERY ---- */
+@media (max-width: 992px) {
+  .participant-gallery { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 576px) {
+  .participant-gallery { grid-template-columns: 1fr; }
+}

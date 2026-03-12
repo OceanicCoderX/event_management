@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Results — EventStar</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">
+<link href="../css/student.css" rel="stylesheet">
+</head>
+<body>
+<div id="page-loader"><div class="loader-spinner"></div></div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg student-navbar sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="dashboard.html"><i class="bi bi-stars me-2"></i>EventStar</a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="bi bi-list text-white fs-4"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-grid me-1"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="browse_events.html"><i class="bi bi-calendar-event me-1"></i>Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="vote.html"><i class="bi bi-hand-thumbs-up me-1"></i>Vote</a></li>
+        <li class="nav-item"><a class="nav-link" href="leaderboard.html"><i class="bi bi-bar-chart me-1"></i>Leaderboard</a></li>
+        <li class="nav-item"><a class="nav-link active" href="results.html"><i class="bi bi-trophy me-1"></i>Results</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <span class="text-white-50 small" id="nav-user-name"></span>
+        <button onclick="logout()" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-box-arrow-right me-1"></i>Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="student-hero">
+  <div class="container py-3">
+    <h4 class="fw-700 text-white mt-2 mb-0"><i class="bi bi-trophy me-2"></i>Event Results</h4>
+    <p class="text-white-50 mb-0 small">Official announced results with rankings</p>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="card p-3 mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-6">
+        <label class="form-label small fw-600">Select Event</label>
+        <select id="event-select" class="form-select" onchange="loadResults(this.value)">
+          <option value="">-- Choose an event --</option>
+        </select>
+      </div>
+      <div class="col-md-3" id="share-section" style="display:none">
+        <button class="btn btn-outline-primary w-100" onclick="shareResults()">
+          <i class="bi bi-share me-2"></i>Share Results
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="results-section">
+    <div class="empty-state"><i class="bi bi-trophy"></i><h5>Select an event to view results</h5></div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const user = checkAuth('student');
+let currentEventTitle = '';
+
+if (user) {
+  document.getElementById('nav-user-name').textContent = user.full_name;
+  fetch('../cgi-bin/get_results.py').then(r => r.json()).then(data => {
+    const sel = document.getElementById('event-select');
+    if (data.status === 'success' && data.data.length > 0) {
+      data.data.forEach(ev => sel.innerHTML += '<option value="' + ev.event_id + '">' + ev.title + '</option>');
+      const urlEvent = new URLSearchParams(window.location.search).get('event');
+      if (urlEvent) { sel.value = urlEvent; loadResults(urlEvent); }
+      else { sel.selectedIndex = 1; loadResults(sel.value); }
+    } else {
+      sel.innerHTML = '<option>No announced results yet</option>';
+    }
+  });
+}
+
+async function loadResults(eventId) {
+  if (!eventId) return;
+  document.getElementById('results-section').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-warning"></div></div>';
+  try {
+    const res = await fetch('../cgi-bin/get_results.py?event_id=' + eventId);
+    const data = await res.json();
+    if (data.status !== 'success' || data.data.length === 0) {
+      document.getElementById('results-section').innerHTML = '<div class="empty-state"><i class="bi bi-hourglass-split"></i><p>No results available</p></div>';
+      return;
+    }
+    currentEventTitle = data.event.title;
+    document.getElementById('share-section').style.display = 'block';
+    const sorted = data.data;
+    const winner = sorted[0];
+    const second = sorted[1];
+    const third = sorted[2];
+
+    const podiumHtml = '<div id="winner-section" class="text-center mb-5">' +
+      '<h3 class="fw-800 mb-4" style="color:var(--primary)">' + String.fromCodePoint(0x1F3C6) + ' ' + currentEventTitle + ' Results</h3>' +
+      '<div class="podium-container">' +
+      (second ? '<div class="podium-place podium-2nd"><div class="display-6 mb-2">' + String.fromCodePoint(0x1F948) + '</div><div class="fw-700">' + second.full_name + '</div><small>' + (second.performance_title || '') + '</small><div class="mt-2 fw-800">' + parseFloat(second.final_score).toFixed(2) + '</div><div class="small opacity-75">2nd Place</div></div>' : '<div class="podium-place podium-2nd"></div>') +
+      '<div class="podium-place podium-1st"><div class="display-4 mb-2">' + String.fromCodePoint(0x1F451) + '</div><div class="fw-800 fs-5">' + winner.full_name + '</div><small>' + (winner.performance_title || '') + '</small><div class="mt-2 fw-800 fs-4">' + parseFloat(winner.final_score).toFixed(2) + '</div><div class="small">' + String.fromCodePoint(0x1F947) + ' WINNER</div></div>' +
+      (third ? '<div class="podium-place podium-3rd"><div class="display-6 mb-2">' + String.fromCodePoint(0x1F949) + '</div><div class="fw-700">' + third.full_name + '</div><small>' + (third.performance_title || '') + '</small><div class="mt-2 fw-800">' + parseFloat(third.final_score).toFixed(2) + '</div><div class="small opacity-75">3rd Place</div></div>' : '<div class="podium-place podium-3rd"></div>') +
+      '</div></div>';
+
+    const tableRows = sorted.map(function(r, i) {
+      return '<tr class="' + (i === 0 ? 'table-warning fw-700' : '') + '">' +
+        '<td>' + (i === 0 ? String.fromCodePoint(0x1F947) : i === 1 ? String.fromCodePoint(0x1F948) : i === 2 ? String.fromCodePoint(0x1F949) : r.rank) + (r.is_winner ? ' ' + String.fromCodePoint(0x1F451) : '') + '</td>' +
+        '<td><div class="fw-600">' + r.full_name + '</div><small class="text-muted">' + (r.performance_title || '') + '</small></td>' +
+        '<td class="text-center">' + parseFloat(r.judge_score).toFixed(2) + '</td>' +
+        '<td class="text-center">' + parseFloat(r.vote_score).toFixed(2) + '</td>' +
+        '<td class="text-center fw-700">' + parseFloat(r.final_score).toFixed(2) + '</td>' +
+        '</tr>';
+    }).join('');
+
+    document.getElementById('results-section').innerHTML = podiumHtml +
+      '<div class="card"><div class="table-responsive"><table class="table table-hover mb-0"><thead style="background:var(--primary);color:white"><tr><th>Rank</th><th>Participant</th><th class="text-center">Judge Score</th><th class="text-center">Vote Score</th><th class="text-center">Final Score</th></tr></thead><tbody>' + tableRows + '</tbody></table></div></div>';
+
+    // Fire confetti for results
+    setTimeout(function() {
+      if (typeof confetti !== 'undefined') {
+        confetti({ particleCount: 150, spread: 120, origin: { y: 0.6 }, colors: ['#FFB400', '#7B2FBE', '#FF4D8D', '#ffffff'] });
+        setTimeout(function() {
+          var end = Date.now() + 3000;
+          (function frame() {
+            confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#7B2FBE','#FFB400'] });
+            confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#7B2FBE','#FFB400'] });
+            if (Date.now() < end) requestAnimationFrame(frame);
+          })();
+        }, 500);
+      }
+    }, 300);
+  } catch(e) {
+    document.getElementById('results-section').innerHTML = '<div class="text-center text-danger">Failed to load results</div>';
+  }
+}
+
+function shareResults() {
+  if (navigator.share) {
+    navigator.share({ title: currentEventTitle + ' Results', text: 'Check out the results!', url: window.location.href })
+      .catch(() => {});
+  } else {
+    navigator.clipboard.writeText(window.location.href).then(() => showToast('Link copied to clipboard!', 'success'));
+  }
+}
+</script>
+</body>
+</html>

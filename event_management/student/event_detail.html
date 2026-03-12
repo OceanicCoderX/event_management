@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Detail — EventStar</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">
+<link href="../css/student.css" rel="stylesheet">
+</head>
+<body>
+<div id="page-loader"><div class="loader-spinner"></div></div>
+
+<nav class="navbar navbar-expand-lg student-navbar sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="dashboard.html"><i class="bi bi-stars me-2"></i>EventStar</a>
+    <div class="navbar-nav ms-auto flex-row gap-2 align-items-center">
+      <a class="nav-link text-white-50 small" href="browse_events.html"><i class="bi bi-arrow-left me-1"></i>Back to Events</a>
+      <button onclick="logout()" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</nav>
+
+<div id="event-content">
+  <div class="text-center py-5"><div class="spinner-border text-accent"></div></div>
+</div>
+
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const user = checkAuth('student');
+const eventId = new URLSearchParams(window.location.search).get('id');
+
+if (user && eventId) {
+  fetch(`../cgi-bin/get_event_detail.py?event_id=${eventId}`)
+    .then(r => r.json()).then(data => {
+      if (data.status !== 'success') {
+        document.getElementById('event-content').innerHTML = '<div class="container py-5 text-center text-danger">Event not found</div>';
+        return;
+      }
+      const ev = data.event;
+      const parts = data.participants;
+
+      document.title = `${ev.title} — EventStar`;
+
+      let participantsHtml = '';
+      if (parts.length > 0) {
+        participantsHtml = parts.map(p => `
+          <div class="col-md-4 col-6">
+            <div class="participant-gallery-card">
+              <div style="background:linear-gradient(135deg,var(--primary),var(--accent));height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem">
+                ${p.photo ? `<img src="../${p.photo}" alt="${p.full_name}" style="width:100%;height:100%;object-fit:cover">` : '🎭'}
+              </div>
+              <div class="card-body">
+                <h6 class="fw-600 mb-1 small">${p.full_name}</h6>
+                <p class="text-muted mb-2" style="font-size:0.75rem">${p.performance_title || ''}</p>
+                <span class="badge" style="background:rgba(123,47,190,0.1);color:var(--accent)">
+                  <i class="bi bi-hand-thumbs-up me-1"></i>${p.vote_count} votes
+                </span>
+              </div>
+            </div>
+          </div>`).join('');
+      } else {
+        participantsHtml = `<div class="col-12"><div class="empty-state"><i class="bi bi-people"></i><p>No approved participants yet</p></div></div>`;
+      }
+
+      document.getElementById('event-content').innerHTML = `
+        <div class="student-hero" style="background: url('../${ev.poster_image || 'uploads/events/default_poster.jpg'}') center/cover no-repeat; position: relative; border-bottom: 2px solid var(--gold);">
+          <div style="position:absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(135deg, rgba(45,0,80,0.85), rgba(45,0,80,0.6)); z-index: 1;"></div>
+          <div class="container py-4" style="position:relative; z-index: 2;">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="dashboard.html" class="text-white-50 text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="browse_events.html" class="text-white-50 text-decoration-none">Events</a></li>
+                <li class="breadcrumb-item text-white active">${ev.title}</li>
+              </ol>
+            </nav>
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
+              <span class="badge rounded-pill bg-light text-dark">${ev.category_name || 'Event'}</span>
+              ${getStatusBadge(ev.status)}
+              ${ev.voting_open ? '<span class="live-badge"><span class="live-dot"></span>VOTING OPEN</span>' : ''}
+            </div>
+            <h2 class="fw-800 text-white mb-2">${ev.title}</h2>
+            <div class="d-flex flex-wrap gap-4 text-white-50 small">
+              <span><i class="bi bi-calendar me-1"></i>${formatDate(ev.event_date)}</span>
+              <span><i class="bi bi-geo-alt me-1"></i>${ev.venue || '—'}</span>
+              <span><i class="bi bi-people me-1"></i>${parts.length} Participants</span>
+            </div>
+          </div>
+        </div>
+        <div class="container py-4">
+          <div class="row g-4">
+            <div class="col-lg-8">
+              <div class="card p-4 mb-4">
+                <h6 class="fw-700 mb-3"><i class="bi bi-info-circle me-2 text-accent"></i>About This Event</h6>
+                <p class="text-muted">${ev.description || 'No description available.'}</p>
+                <div class="row g-2 mt-2">
+                  <div class="col-md-4">
+                    <div class="p-3 rounded-3" style="background:var(--light-bg)">
+                      <div class="small text-muted">Date</div>
+                      <div class="fw-600">${formatDate(ev.event_date)}</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="p-3 rounded-3" style="background:var(--light-bg)">
+                      <div class="small text-muted">Venue</div>
+                      <div class="fw-600">${ev.venue || '—'}</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="p-3 rounded-3" style="background:var(--light-bg)">
+                      <div class="small text-muted">Deadline</div>
+                      <div class="fw-600">${formatDate(ev.registration_deadline)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-700 mb-0"><i class="bi bi-people me-2 text-accent"></i>Participants (${parts.length})</h6>
+                </div>
+                <div class="row g-3">${participantsHtml}</div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="card p-4">
+                <h6 class="fw-700 mb-3"><i class="bi bi-lightning me-2 text-warning"></i>Actions</h6>
+                ${ev.voting_open ? `<a href="vote.html?event=${eventId}" class="btn btn-primary-custom w-100 mb-2"><i class="bi bi-hand-thumbs-up me-2"></i>Cast Your Vote</a>` : '<div class="alert alert-secondary small py-2 text-center">Voting is currently closed</div>'}
+                ${ev.results_announced ? `<a href="results.html?event=${eventId}" class="btn btn-gold w-100"><i class="bi bi-trophy me-2"></i>View Results</a>` : ''}
+                <a href="leaderboard.html?event=${eventId}" class="btn btn-outline-primary w-100 mt-2"><i class="bi bi-bar-chart me-2"></i>Live Leaderboard</a>
+              </div>
+
+              ${data.criteria.length > 0 ? `
+              <div class="card p-4 mt-3">
+                <h6 class="fw-700 mb-3"><i class="bi bi-clipboard-check me-2 text-accent"></i>Scoring Criteria</h6>
+                ${data.criteria.map(c => `
+                  <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                      <div class="fw-600 small">${c.criteria_name}</div>
+                      <div class="text-muted" style="font-size:0.75rem">${c.description || ''}</div>
+                    </div>
+                    <span class="badge bg-accent text-white">${c.max_marks} pts</span>
+                  </div>`).join('')}
+                <div class="d-flex justify-content-between pt-2">
+                  <span class="fw-700">Total</span>
+                  <span class="fw-700 text-accent">${data.criteria.reduce((s,c) => s + c.max_marks, 0)} pts</span>
+                </div>
+              </div>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).catch(() => {
+      document.getElementById('event-content').innerHTML = '<div class="container py-5 text-center text-danger">Failed to load event</div>';
+    });
+} else if (!eventId) {
+  window.location.href = 'browse_events.html';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Categories — Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">
+<link href="../css/admin.css" rel="stylesheet">
+</head>
+<body>
+<div id="page-loader"><div class="loader-spinner"></div></div>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside class="admin-sidebar" id="admin-sidebar">
+  <div class="sidebar-brand"><div class="d-flex align-items-center gap-2"><i class="bi bi-stars text-warning fs-4"></i><div><span>EventStar</span><br><small>Admin Panel</small></div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Overview</div><a href="dashboard.html"><i class="bi bi-grid"></i>Dashboard</a>
+    <div class="nav-section-title">Events</div>
+    <a href="manage_events.html"><i class="bi bi-calendar-event"></i>Manage Events</a>
+    <a href="manage_categories.html" class="active"><i class="bi bi-tags"></i>Categories</a>
+    <a href="manage_criteria.html"><i class="bi bi-clipboard-check"></i>Criteria</a>
+    <div class="nav-section-title">People</div>
+    <a href="manage_participants.html"><i class="bi bi-people"></i>Participants</a>
+    <a href="manage_judges.html"><i class="bi bi-person-badge"></i>Judges</a>
+    <a href="assign_judges.html"><i class="bi bi-person-plus"></i>Assign Judges</a>
+    <div class="nav-section-title">Controls</div>
+    <a href="voting_control.html"><i class="bi bi-toggle-on"></i>Voting Control</a>
+    <a href="score_lock.html"><i class="bi bi-lock"></i>Score Lock</a>
+    <a href="announce_results.html"><i class="bi bi-trophy"></i>Announce Results</a>
+    <a href="reports.html"><i class="bi bi-bar-chart"></i>Reports</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info"><div class="admin-avatar" id="admin-avatar">A</div><div><div class="admin-name" id="admin-name">Admin</div><div class="admin-role">Administrator</div></div></div>
+    <button onclick="logout()" class="btn btn-outline-light btn-sm w-100"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+  </div>
+</aside>
+<div class="admin-main">
+  <div class="admin-topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button id="sidebar-toggle"><i class="bi bi-list"></i></button>
+      <div class="page-title">Manage Categories</div>
+    </div>
+    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#catModal" onclick="openAdd()">
+      <i class="bi bi-plus me-2"></i>Add Category
+    </button>
+  </div>
+  <div class="admin-content">
+    <div class="row g-3" id="categories-grid">
+      <div class="col-12 text-center py-4"><div class="spinner-border text-accent"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="catModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background:var(--primary);color:white">
+        <h5 class="modal-title" id="cat-modal-title">Add Category</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cat-id">
+        <div class="mb-3"><label class="form-label fw-600 small">Category Name *</label><input type="text" id="cat-name" class="form-control" required></div>
+        <div class="mb-3"><label class="form-label fw-600 small">Description</label><textarea id="cat-desc" class="form-control" rows="3"></textarea></div>
+        <div class="mb-3"><label class="form-label fw-600 small">Category Image (Optional)</label><input type="file" id="cat-image" class="form-control" accept="image/*"></div>
+        <div class="mb-3" style="display:none;">
+          <label class="form-label fw-600 small">Bootstrap Icon</label>
+          <select id="cat-icon" class="form-select">
+            <option value="bi-star">⭐ General (bi-star)</option>
+            <option value="bi-music-note-beamed">🎵 Music (bi-music-note-beamed)</option>
+            <option value="bi-cpu">💻 Technical (bi-cpu)</option>
+            <option value="bi-trophy">🏆 Sports (bi-trophy)</option>
+            <option value="bi-camera">📷 Photography (bi-camera)</option>
+            <option value="bi-brush">🎨 Art (bi-brush)</option>
+            <option value="bi-book">📚 Literature (bi-book)</option>
+            <option value="bi-mic">🎤 Talent Show (bi-mic)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary-custom" onclick="saveCategory()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const user = checkAuth('admin');
+if (user) { document.getElementById('admin-name').textContent = user.full_name; document.getElementById('admin-avatar').textContent = user.full_name.charAt(0); loadCategories(); }
+
+function loadCategories() {
+  fetch('../cgi-bin/manage_categories.py?action=get').then(r => r.json()).then(data => {
+    const grid = document.getElementById('categories-grid');
+    if (data.status === 'success' && data.data.length > 0) {
+      grid.innerHTML = data.data.map(c => `
+        <div class="col-md-6 col-lg-3">
+          <div class="card p-4 text-center">
+            ${c.image ? `<img src="../${c.image}" alt="${c.name}" class="img-fluid rounded mb-3" style="height:120px; object-fit:cover; width:100%;">` : `<i class="bi ${c.icon || 'bi-star'} fs-1 text-accent d-block mb-2"></i>`}
+            <h6 class="fw-700">${c.name}</h6>
+            <p class="text-muted small">${c.description || ''}</p>
+            <span class="badge bg-light text-dark mb-3">${c.event_count || 0} Events</span>
+            <div class="d-flex gap-2 justify-content-center">
+              <button class="btn btn-sm btn-outline-primary" onclick="editCategory(${c.category_id},'${c.name.replace(/'/g,"\\'")}','${c.description ? c.description.replace(/'/g,"\\'") : ''}','${c.icon}')"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(${c.category_id},'${c.name.replace(/'/g,"\\'")}')"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+        </div>`).join('');
+    } else {
+      grid.innerHTML = '<div class="col-12"><div class="empty-state"><i class="bi bi-tags"></i><p>No categories yet</p></div></div>';
+    }
+  });
+}
+
+function openAdd() { document.getElementById('cat-id').value=''; document.getElementById('cat-name').value=''; document.getElementById('cat-desc').value=''; document.getElementById('cat-icon').value='bi-star'; if(document.getElementById('cat-image')) document.getElementById('cat-image').value=''; document.getElementById('cat-modal-title').textContent='Add Category'; }
+function editCategory(id, name, desc, icon) { document.getElementById('cat-id').value=id; document.getElementById('cat-name').value=name; document.getElementById('cat-desc').value=desc; document.getElementById('cat-icon').value=icon; if(document.getElementById('cat-image')) document.getElementById('cat-image').value=''; document.getElementById('cat-modal-title').textContent='Edit Category'; new bootstrap.Modal(document.getElementById('catModal')).show(); }
+
+async function saveCategory() {
+  const id = document.getElementById('cat-id').value;
+  const name = document.getElementById('cat-name').value.trim();
+  if (!name) { showToast('Name required', 'warning'); return; }
+  const body = new FormData();
+  body.append('action', id ? 'edit' : 'add');
+  if(id) body.append('category_id', id);
+  body.append('name', name);
+  body.append('description', document.getElementById('cat-desc').value);
+  body.append('icon', document.getElementById('cat-icon').value);
+  const imageFile = document.getElementById('cat-image').files[0];
+  if(imageFile) body.append('image', imageFile);
+  const res = await fetch('../cgi-bin/manage_categories.py', { method: 'POST', body });
+  const data = await res.json();
+  if (data.status === 'success') { showToast(data.message, 'success'); bootstrap.Modal.getInstance(document.getElementById('catModal')).hide(); loadCategories(); }
+  else showToast(data.message, 'danger');
+}
+
+function deleteCategory(id, name) {
+  if (!confirm('Delete category: ' + name + '?')) return;
+  fetch('../cgi-bin/manage_categories.py', { method: 'POST', body: new URLSearchParams({ action: 'delete', category_id: id }) })
+    .then(r => r.json()).then(data => { if (data.status === 'success') { showToast('Deleted', 'success'); loadCategories(); } else showToast(data.message, 'danger'); });
+}
+</script>
+</body>
+</html>

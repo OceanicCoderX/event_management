@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --primary: #2D0050;
+  --accent: #7B2FBE;
+  --accent-light: #9B59D0;
+  --gold: #FFB400;
+  --gold-light: #FFD166;
+  --success: #28A745;
+  --danger: #DC3545;
+  --warning: #FFC107;
+  --light-bg: #F8F5FF;
+  --card-shadow: 0 4px 20px rgba(123,47,190,0.12);
+  --transition: all 0.3s ease;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--light-bg);
+  color: #333;
+}
+
+h1,h2,h3,h4,h5,h6,.navbar-brand { font-family: 'Poppins', sans-serif; }
+
+/* ---- PAGE LOADER ---- */
+#page-loader {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255,255,255,0.9);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.loader-spinner {
+  width: 50px; height: 50px;
+  border: 4px solid #f3e8ff;
+  border-top: 4px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- FADE IN ANIMATION ---- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: fadeInUp 0.5s ease forwards; }
+.fade-in-1 { animation: fadeInUp 0.5s ease 0.1s both; }
+.fade-in-2 { animation: fadeInUp 0.5s ease 0.2s both; }
+.fade-in-3 { animation: fadeInUp 0.5s ease 0.3s both; }
+.fade-in-4 { animation: fadeInUp 0.5s ease 0.4s both; }
+
+/* ---- CARDS ---- */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+}
+
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(123,47,190,0.18); }
+
+.card-accent-left { border-left: 4px solid var(--accent) !important; }
+.card-accent-gold { border-left: 4px solid var(--gold) !important; }
+.card-accent-success { border-left: 4px solid var(--success) !important; }
+.card-accent-danger { border-left: 4px solid var(--danger) !important; }
+
+/* ---- STAT CARDS ---- */
+.stat-card { border-radius: 12px; padding: 1.5rem; }
+.stat-card .stat-icon {
+  width: 56px; height: 56px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.stat-card h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0; }
+.stat-card p { margin-bottom: 0; color: #888; font-size: 0.9rem; }
+
+/* ---- BUTTONS ---- */
+.btn-primary-custom {
+  background: var(--accent);
+  border: none; color: white;
+  border-radius: 8px; padding: 0.5rem 1.5rem;
+  font-weight: 600; transition: var(--transition);
+}
+.btn-primary-custom:hover { background: var(--primary); color: white; }
+
+.btn-gold {
+  background: var(--gold); border: none; color: var(--primary);
+  border-radius: 8px; padding: 0.5rem 1.5rem;
+  font-weight: 700; transition: var(--transition);
+}
+.btn-gold:hover { background: #e6a200; color: var(--primary); }
+
+/* ---- CUSTOM SCROLLBAR ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ---- TOAST NOTIFICATIONS ---- */
+.toast-container { z-index: 11000; }
+.custom-toast {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* ---- BADGE STYLES ---- */
+.badge-pending { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+.badge-approved { background: #d4edda; color: #155724; border: 1px solid #28a745; }
+.badge-rejected { background: #f8d7da; color: #721c24; border: 1px solid #dc3545; }
+.badge-upcoming { background: #d1ecf1; color: #0c5460; border: 1px solid #17a2b8; }
+.badge-ongoing { background: #d4edda; color: #155724; border: 1px solid #28a745; }
+.badge-completed { background: #e2e3e5; color: #383d41; border: 1px solid #6c757d; }
+.badge-cancelled { background: #f8d7da; color: #721c24; border: 1px solid #dc3545; }
+
+/* ---- PODIUM ---- */
+.podium-container {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 1rem; padding: 2rem 0;
+}
+
+.podium-place {
+  text-align: center; border-radius: 12px 12px 0 0;
+  padding: 1.5rem 1rem;
+  min-width: 160px;
+}
+
+.podium-1st {
+  background: linear-gradient(135deg, #FFB400, #FFD166);
+  height: 220px; min-width: 200px;
+  box-shadow: 0 8px 32px rgba(255,180,0,0.4);
+}
+
+.podium-2nd {
+  background: linear-gradient(135deg, #C0C0C0, #E8E8E8);
+  height: 180px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.podium-3rd {
+  background: linear-gradient(135deg, #CD7F32, #E8A87C);
+  height: 150px;
+  box-shadow: 0 4px 16px rgba(205,127,50,0.3);
+}
+
+.podium-place img {
+  width: 60px; height: 60px;
+  border-radius: 50%; object-fit: cover;
+  border: 3px solid white;
+  margin-bottom: 0.5rem;
+}
+
+.podium-1st img { width: 80px; height: 80px; }
+
+.podium-place h5 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0; }
+.podium-1st h5 { font-size: 1.1rem; }
+
+/* ---- WINNER CARD ---- */
+.winner-card {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  border: none; border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(255,180,0,0.35);
+  color: var(--primary);
+}
+
+/* ---- LIVE BADGE ---- */
+.live-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: #dc3545; color: white;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 8px; height: 8px;
+  background: white; border-radius: 50%;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ---- TABLE STYLES ---- */
+.table-hover tbody tr:hover { background: rgba(123,47,190,0.05); }
+
+/* ---- HERO SECTION ---- */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  min-height: 100vh;
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute; top: -50%; left: -10%;
+  width: 600px; height: 600px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 50%;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute; bottom: -30%; right: -5%;
+  width: 400px; height: 400px;
+  background: rgba(255,180,0,0.08);
+  border-radius: 50%;
+}
+
+/* ---- STEP CARD ---- */
+.step-card {
+  text-align: center; padding: 2rem 1rem;
+  position: relative;
+}
+
+.step-number {
+  width: 50px; height: 50px;
+  background: var(--accent); color: white;
+  border-radius: 50%; font-size: 1.25rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+/* ---- EMPTY STATE ---- */
+.empty-state {
+  text-align: center; padding: 3rem;
+  color: #999;
+}
+.empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+/* ---- VOTE BUTTON STATES ---- */
+.btn-voted {
+  background: #28a745 !important;
+  color: white !important;
+  cursor: not-allowed;
+}
+
+/* ---- LEADERBOARD ---- */
+.rank-gold { background: rgba(255,180,0,0.15) !important; }
+.rank-silver { background: rgba(192,192,192,0.15) !important; }
+.rank-bronze { background: rgba(205,127,50,0.15) !important; }
+
+/* ---- FORM STYLES ---- */
+.form-control:focus, .form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(123,47,190,0.15);
+}
+
+/* ---- PARTICIPANT PHOTO ---- */
+.participant-photo {
+  width: 100%; height: 180px;
+  object-fit: cover; border-radius: 8px;
+}
+
+.participant-avatar {
+  width: 60px; height: 60px;
+  border-radius: 50%; object-fit: cover;
+}
+
+/* ---- SCORE PROGRESS ---- */
+.score-bar-container { background: #e9ecef; border-radius: 20px; height: 8px; }
+.score-bar { background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 20px; height: 8px; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .podium-container { flex-direction: column; align-items: center; }
+  .podium-place { width: 100%; max-width: 300px; height: auto !important; }
+  .hero-section { min-height: 80vh; }
+}

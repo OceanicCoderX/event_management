@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Events — Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">
+<link href="../css/admin.css" rel="stylesheet">
+</head>
+<body>
+<div id="page-loader"><div class="loader-spinner"></div></div>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside class="admin-sidebar" id="admin-sidebar">
+  <div class="sidebar-brand"><div class="d-flex align-items-center gap-2"><i class="bi bi-stars text-warning fs-4"></i><div><span>EventStar</span><br><small>Admin Panel</small></div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Overview</div>
+    <a href="dashboard.html"><i class="bi bi-grid"></i>Dashboard</a>
+    <div class="nav-section-title">Events</div>
+    <a href="manage_events.html" class="active"><i class="bi bi-calendar-event"></i>Manage Events</a>
+    <a href="manage_categories.html"><i class="bi bi-tags"></i>Categories</a>
+    <a href="manage_criteria.html"><i class="bi bi-clipboard-check"></i>Criteria</a>
+    <div class="nav-section-title">People</div>
+    <a href="manage_participants.html"><i class="bi bi-people"></i>Participants</a>
+    <a href="manage_judges.html"><i class="bi bi-person-badge"></i>Judges</a>
+    <a href="assign_judges.html"><i class="bi bi-person-plus"></i>Assign Judges</a>
+    <div class="nav-section-title">Controls</div>
+    <a href="voting_control.html"><i class="bi bi-toggle-on"></i>Voting Control</a>
+    <a href="score_lock.html"><i class="bi bi-lock"></i>Score Lock</a>
+    <a href="announce_results.html"><i class="bi bi-trophy"></i>Announce Results</a>
+    <a href="reports.html"><i class="bi bi-bar-chart"></i>Reports</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info"><div class="admin-avatar" id="admin-avatar">A</div><div><div class="admin-name" id="admin-name">Admin</div><div class="admin-role">Administrator</div></div></div>
+    <button onclick="logout()" class="btn btn-outline-light btn-sm w-100"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+  </div>
+</aside>
+<div class="admin-main">
+  <div class="admin-topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button id="sidebar-toggle"><i class="bi bi-list"></i></button>
+      <div class="page-title">Manage Events</div>
+    </div>
+    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#eventModal" onclick="openAddModal()">
+      <i class="bi bi-plus me-2"></i>Add Event
+    </button>
+  </div>
+  <div class="admin-content">
+    <div class="card mb-3 p-3">
+      <input type="text" class="form-control" id="search-events" placeholder="Search events..." oninput="filterTable()">
+    </div>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead style="background:var(--primary);color:white">
+            <tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Voting</th><th>Locked</th><th>Results</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="events-tbody">
+            <tr><td colspan="8" class="text-center py-4"><div class="spinner-border spinner-border-sm text-accent"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Event Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background:var(--primary);color:white">
+        <h5 class="modal-title" id="modal-title">Add Event</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="event-form">
+          <input type="hidden" id="event-id">
+          <div class="row g-3">
+            <div class="col-md-8"><label class="form-label fw-600 small">Title *</label><input type="text" id="e-title" class="form-control" required></div>
+            <div class="col-md-4"><label class="form-label fw-600 small">Category</label><select id="e-category" class="form-select"><option value="">None</option></select></div>
+            <div class="col-12"><label class="form-label fw-600 small">Description</label><textarea id="e-desc" class="form-control" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-600 small">Venue</label><input type="text" id="e-venue" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label fw-600 small">Status</label><select id="e-status" class="form-select"><option>Upcoming</option><option>Ongoing</option><option>Completed</option><option>Cancelled</option></select></div>
+            <div class="col-md-6"><label class="form-label fw-600 small">Event Date *</label><input type="date" id="e-date" class="form-control" required></div>
+            <div class="col-md-6"><label class="form-label fw-600 small">Reg. Deadline</label><input type="date" id="e-deadline" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label fw-600 small">Judge Weight %</label><input type="number" id="e-jw" class="form-control" value="60" min="0" max="100"></div>
+            <div class="col-md-6"><label class="form-label fw-600 small">Vote Weight %</label><input type="number" id="e-vw" class="form-control" value="40" min="0" max="100"></div>
+            <div class="col-12"><label class="form-label fw-600 small">Event Poster (Optional)</label><input type="file" id="e-poster" class="form-control" accept="image/*"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary-custom" onclick="saveEvent()">Save Event</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const user = checkAuth('admin');
+if (user) {
+  document.getElementById('admin-name').textContent = user.full_name;
+  document.getElementById('admin-avatar').textContent = user.full_name.charAt(0);
+  loadCategories();
+  loadEvents();
+}
+
+function loadCategories() {
+  fetch('../cgi-bin/manage_categories.py?action=get').then(r => r.json()).then(data => {
+    if (data.status === 'success') {
+      const sel = document.getElementById('e-category');
+      data.data.forEach(c => sel.innerHTML += '<option value="' + c.category_id + '">' + c.name + '</option>');
+    }
+  });
+}
+
+function loadEvents() {
+  fetch('../cgi-bin/get_events.py').then(r => r.json()).then(data => {
+    const tbody = document.getElementById('events-tbody');
+    if (data.status === 'success' && data.data.length > 0) {
+      tbody.innerHTML = data.data.map(ev => `
+        <tr>
+          <td><div class="fw-600">${ev.title}</div><small class="text-muted">${ev.venue || '—'}</small></td>
+          <td><small>${ev.category_name || '—'}</small></td>
+          <td><small>${formatDate(ev.event_date)}</small></td>
+          <td>${getStatusBadge(ev.status)}</td>
+          <td>${ev.voting_open ? '<span class="badge bg-success">Open</span>' : '<span class="badge bg-secondary">Closed</span>'}</td>
+          <td>${ev.scores_locked ? '<span class="badge bg-danger"><i class="bi bi-lock me-1"></i>Locked</span>' : '<span class="badge bg-light text-dark">Unlocked</span>'}</td>
+          <td>${ev.results_announced ? '<span class="badge bg-warning text-dark">Announced</span>' : '<span class="badge bg-light text-dark">Pending</span>'}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <button class="btn btn-sm btn-outline-primary" onclick="editEvent(${ev.event_id})" title="Edit"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteEvent(${ev.event_id}, '${ev.title.replace(/'/g,"\\'")}')"><i class="bi bi-trash"></i></button>
+            </div>
+          </td>
+        </tr>`).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">No events found</td></tr>';
+    }
+  });
+}
+
+function openAddModal() {
+  document.getElementById('event-id').value = '';
+  document.getElementById('event-form').reset();
+  if(document.getElementById('e-poster')) document.getElementById('e-poster').value = '';
+  document.getElementById('modal-title').textContent = 'Add Event';
+}
+
+async function editEvent(id) {
+  const res = await fetch('../cgi-bin/get_event_detail.py?event_id=' + id);
+  const data = await res.json();
+  if (data.status !== 'success') return;
+  const ev = data.event;
+  document.getElementById('event-id').value = ev.event_id;
+  document.getElementById('e-title').value = ev.title;
+  document.getElementById('e-category').value = ev.category_id || '';
+  document.getElementById('e-desc').value = ev.description || '';
+  document.getElementById('e-venue').value = ev.venue || '';
+  document.getElementById('e-status').value = ev.status;
+  document.getElementById('e-date').value = ev.event_date;
+  document.getElementById('e-deadline').value = ev.registration_deadline || '';
+  document.getElementById('e-jw').value = ev.judge_weight;
+  document.getElementById('e-vw').value = ev.vote_weight;
+  document.getElementById('modal-title').textContent = 'Edit Event';
+  new bootstrap.Modal(document.getElementById('eventModal')).show();
+}
+
+async function saveEvent() {
+  const id = document.getElementById('event-id').value;
+  const title = document.getElementById('e-title').value.trim();
+  if (!title) { showToast('Title is required', 'warning'); return; }
+
+  const body = new FormData();
+  body.append('event_id', id);
+  body.append('title', title);
+  body.append('category_id', document.getElementById('e-category').value);
+  body.append('description', document.getElementById('e-desc').value);
+  body.append('venue', document.getElementById('e-venue').value);
+  body.append('event_date', document.getElementById('e-date').value);
+  body.append('registration_deadline', document.getElementById('e-deadline').value);
+  body.append('status', document.getElementById('e-status').value);
+  body.append('judge_weight', document.getElementById('e-jw').value);
+  body.append('vote_weight', document.getElementById('e-vw').value);
+  const posterFile = document.getElementById('e-poster').files[0];
+  if(posterFile) body.append('poster_image', posterFile);
+
+  const res = await fetch('../cgi-bin/add_edit_event.py', { method: 'POST', body });
+  const data = await res.json();
+  if (data.status === 'success') {
+    showToast(data.message, 'success');
+    bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+    loadEvents();
+  } else {
+    showToast(data.message, 'danger');
+  }
+}
+
+function deleteEvent(id, title) {
+  if (!confirm('Delete event: ' + title + '?\n\nThis will also delete all participants, scores and votes for this event.')) return;
+  fetch('../cgi-bin/delete_event.py', { method: 'POST', body: new URLSearchParams({ event_id: id }) })
+    .then(r => r.json()).then(data => {
+      if (data.status === 'success') { showToast('Event deleted', 'success'); loadEvents(); }
+      else showToast(data.message, 'danger');
+    });
+}
+
+function filterTable() {
+  const term = document.getElementById('search-events').value.toLowerCase();
+  document.querySelectorAll('#events-tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

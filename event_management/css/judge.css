@@ -1,0 +1,77 @@
+/* ---- JUDGE NAVBAR ---- */
+.judge-navbar {
+  background: linear-gradient(90deg, #1a003a, var(--primary));
+  box-shadow: 0 2px 15px rgba(45,0,80,0.3);
+}
+
+.judge-navbar .navbar-brand { color: #5eead4 !important; font-weight: 700; }
+.judge-navbar .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
+.judge-navbar .nav-link:hover { color: #5eead4 !important; }
+
+/* ---- SCORING FORM ---- */
+.scoring-card {
+  background: white; border-radius: 14px;
+  box-shadow: var(--card-shadow); margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.scoring-card .participant-header {
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  padding: 1rem 1.5rem; color: white;
+  display: flex; align-items: center; gap: 1rem;
+}
+
+.scoring-card .participant-header img {
+  width: 50px; height: 50px;
+  border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.5);
+}
+
+.scoring-card .criteria-table { padding: 1rem 1.5rem; }
+
+.criteria-row {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: center; gap: 1rem;
+  padding: 0.75rem 0; border-bottom: 1px solid #f0e8ff;
+}
+
+.criteria-row:last-child { border-bottom: none; }
+
+.criteria-input {
+  width: 80px; text-align: center;
+  border: 2px solid #e0d0f0;
+  border-radius: 8px; padding: 0.4rem;
+  font-weight: 600; font-size: 1rem;
+  color: var(--accent);
+  transition: var(--transition);
+}
+
+.criteria-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(123,47,190,0.1);
+}
+
+.criteria-max { font-size: 0.8rem; color: #999; }
+
+/* ---- LOCKED BANNER ---- */
+.locked-banner {
+  background: #f8d7da; border: 1px solid #f5c6cb;
+  border-radius: 10px; padding: 1rem 1.5rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  color: #721c24; font-weight: 600;
+}
+
+/* ---- EVENT ASSIGNMENT CARDS ---- */
+.event-assignment-card {
+  border-radius: 12px; background: white;
+  box-shadow: var(--card-shadow); padding: 1.5rem;
+  border-left: 4px solid var(--accent);
+  transition: var(--transition); margin-bottom: 1rem;
+}
+
+.event-assignment-card:hover { transform: translateX(4px); }
+.event-assignment-card.completed { border-left-color: var(--success); }
+.event-assignment-card.locked { border-left-color: var(--danger); }
+
+/* ---- JUDGE SCORE SUMMARY ---- */
+.judge-score-table th { background: var(--primary); color: white; }

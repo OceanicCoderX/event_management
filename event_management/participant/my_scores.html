@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Scores — EventStar</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">
+<link href="../css/participant.css" rel="stylesheet">
+</head>
+<body>
+<div id="page-loader"><div class="loader-spinner"></div></div>
+<nav class="navbar navbar-expand-lg participant-navbar sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="dashboard.html"><i class="bi bi-stars me-2"></i>EventStar</a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="bi bi-list text-white fs-4"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="browse_events.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="my_applications.html">My Applications</a></li>
+        <li class="nav-item"><a class="nav-link active" href="my_scores.html">My Scores</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <span class="text-white-50 small" id="nav-user-name"></span>
+        <button onclick="logout()" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="student-hero" style="background:linear-gradient(135deg,var(--primary),#4a0080)">
+  <div class="container py-3">
+    <h4 class="fw-700 text-white mt-2 mb-0"><i class="bi bi-bar-chart me-2"></i>My Scores</h4>
+    <p class="text-white-50 mb-0 small">View your judge scores, votes and ranking</p>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="card p-3 mb-4">
+    <label class="form-label small fw-600">Select Approved Event</label>
+    <select id="event-select" class="form-select" style="max-width:400px" onchange="loadScores(this.value)">
+      <option value="">— Choose an event —</option>
+    </select>
+  </div>
+  <div id="scores-section">
+    <div class="empty-state"><i class="bi bi-bar-chart"></i><h5>Select an event to view your scores</h5></div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const user = checkAuth('participant');
+if (user) {
+  document.getElementById('nav-user-name').textContent = user.full_name;
+  fetch('../cgi-bin/get_my_applications.py?user_id=' + user.user_id).then(r => r.json()).then(data => {
+    const sel = document.getElementById('event-select');
+    if (data.status === 'success') {
+      const approved = data.data.filter(a => a.status === 'Approved');
+      if (approved.length === 0) {
+        sel.innerHTML = '<option>No approved applications</option>';
+      } else {
+        approved.forEach(a => sel.innerHTML += '<option value="' + a.event_id + '">' + a.event_title + '</option>');
+      }
+    }
+    const urlEvent = new URLSearchParams(window.location.search).get('event_id');
+    if (urlEvent) { sel.value = urlEvent; loadScores(urlEvent); }
+  });
+}
+
+async function loadScores(eventId) {
+  if (!eventId) return;
+  document.getElementById('scores-section').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-accent"></div></div>';
+  try {
+    const res = await fetch('../cgi-bin/get_my_scores.py?user_id=' + user.user_id + '&event_id=' + eventId);
+    const data = await res.json();
+    if (data.status !== 'success') {
+      document.getElementById('scores-section').innerHTML = '<div class="alert alert-warning">' + (data.message || 'No data') + '</div>';
+      return;
+    }
+
+    const scores = data.scores;
+    const totalMax = scores.reduce((s, c) => s + (c.max_marks || 0), 0);
+    const judgeNorm = data.judge_score_normalized;
+
+    const criteriaRows = scores.map(s => `
+      <div class="score-criteria-row">
+        <div>
+          <div class="fw-600 small">${s.criteria_name}</div>
+          <div class="text-muted" style="font-size:0.75rem">Max: ${s.max_marks} marks</div>
+        </div>
+        <div class="text-end">
+          ${s.avg_marks !== null ? `<div class="criteria-marks">${s.avg_marks.toFixed(1)} <span class="text-muted small fw-400">/ ${s.max_marks}</span></div>` : '<span class="text-muted small">Not scored</span>'}
+        </div>
+      </div>`).join('');
+
+    document.getElementById('scores-section').innerHTML = `
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="card p-4">
+            <h6 class="fw-700 mb-3"><i class="bi bi-clipboard-check me-2 text-accent"></i>Judge Scores — ${data.participant.event_title}</h6>
+            ${criteriaRows}
+            <div class="mt-3 pt-3 border-top d-flex justify-content-between">
+              <span class="fw-700">Normalized Judge Score</span>
+              <span class="fw-700 text-accent fs-5">${judgeNorm.toFixed(2)} / 100</span>
+            </div>
+            <div class="score-bar-container mt-2">
+              <div class="score-bar" style="width:${judgeNorm}%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="total-score-card">
+                <div class="score-number">${judgeNorm.toFixed(1)}</div>
+                <div class="score-label">Judge Score (out of 100)</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="card p-3 text-center">
+                <i class="bi bi-hand-thumbs-up fs-3 text-warning mb-1"></i>
+                <h4 class="fw-800 mb-0">${data.vote_count}</h4>
+                <small class="text-muted">Public Votes</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="card p-3 text-center">
+                ${data.rank ? `<div class="rank-display mx-auto mb-1">${data.rank}</div><small class="text-muted">Current Rank</small>` : '<i class="bi bi-hourglass fs-3 text-muted mb-1"></i><small class="text-muted">Rank pending</small>'}
+              </div>
+            </div>
+            ${data.final_score !== null ? `
+            <div class="col-12">
+              <div class="card p-3 text-center" style="background:linear-gradient(135deg,var(--gold),#ffd166);color:var(--primary)">
+                <div class="fw-800 fs-2">${data.final_score.toFixed(2)}</div>
+                <small class="fw-600">Final Score (Official)</small>
+              </div>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('scores-section').innerHTML = '<div class="text-center text-danger">Failed to load scores</div>';
+  }
+}
+</script>
+</body>
+</html>

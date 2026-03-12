@@ -1,0 +1,69 @@
+/* ---- PARTICIPANT NAVBAR ---- */
+.participant-navbar {
+  background: linear-gradient(90deg, var(--primary), #4a0080);
+  box-shadow: 0 2px 15px rgba(45,0,80,0.3);
+}
+
+.participant-navbar .navbar-brand { color: #a78bfa !important; font-weight: 700; }
+.participant-navbar .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
+.participant-navbar .nav-link:hover, .participant-navbar .nav-link.active { color: #a78bfa !important; }
+
+/* ---- MY APPLICATIONS TABLE ---- */
+.applications-table tbody tr { vertical-align: middle; }
+.applications-table .event-name { font-weight: 600; font-size: 0.95rem; }
+
+/* ---- SCORE CARD ---- */
+.score-criteria-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.score-criteria-row:last-child { border-bottom: none; }
+
+.criteria-marks {
+  font-size: 1.25rem; font-weight: 700; color: var(--accent);
+}
+
+.total-score-card {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 12px; padding: 1.5rem; color: white; text-align: center;
+}
+
+.total-score-card .score-number { font-size: 3rem; font-weight: 800; line-height: 1; }
+.total-score-card .score-label { font-size: 0.9rem; opacity: 0.8; }
+
+/* ---- RANK BADGE ---- */
+.rank-display {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 60px; height: 60px; border-radius: 50%;
+  background: var(--gold); color: var(--primary);
+  font-size: 1.5rem; font-weight: 800;
+  box-shadow: 0 4px 15px rgba(255,180,0,0.4);
+}
+
+/* ---- APPLY FORM ---- */
+.apply-form-card {
+  background: white; border-radius: 16px; padding: 2rem;
+  box-shadow: var(--card-shadow); max-width: 700px; margin: 0 auto;
+}
+
+.photo-preview {
+  width: 120px; height: 120px; border-radius: 50%;
+  object-fit: cover; border: 3px solid var(--accent);
+  display: none;
+}
+
+/* ---- TIMELINE ---- */
+.event-timeline { position: relative; padding-left: 2rem; }
+.event-timeline::before {
+  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+  width: 2px; background: linear-gradient(180deg, var(--accent), transparent);
+}
+.timeline-item { position: relative; margin-bottom: 1.5rem; }
+.timeline-dot {
+  position: absolute; left: -2rem; top: 0.25rem;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent); border: 3px solid white;
+  box-shadow: 0 0 0 3px rgba(123,47,190,0.2);
+}

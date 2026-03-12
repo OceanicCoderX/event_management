@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Announce Results — Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">
+<link href="../css/admin.css" rel="stylesheet">
+</head>
+<body>
+<div id="page-loader"><div class="loader-spinner"></div></div>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside class="admin-sidebar" id="admin-sidebar">
+  <div class="sidebar-brand"><div class="d-flex align-items-center gap-2"><i class="bi bi-stars text-warning fs-4"></i><div><span>EventStar</span><br><small>Admin Panel</small></div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Overview</div><a href="dashboard.html"><i class="bi bi-grid"></i>Dashboard</a>
+    <div class="nav-section-title">Events</div>
+    <a href="manage_events.html"><i class="bi bi-calendar-event"></i>Manage Events</a>
+    <a href="manage_categories.html"><i class="bi bi-tags"></i>Categories</a>
+    <a href="manage_criteria.html"><i class="bi bi-clipboard-check"></i>Criteria</a>
+    <div class="nav-section-title">People</div>
+    <a href="manage_participants.html"><i class="bi bi-people"></i>Participants</a>
+    <a href="manage_judges.html"><i class="bi bi-person-badge"></i>Judges</a>
+    <a href="assign_judges.html"><i class="bi bi-person-plus"></i>Assign Judges</a>
+    <div class="nav-section-title">Controls</div>
+    <a href="voting_control.html"><i class="bi bi-toggle-on"></i>Voting Control</a>
+    <a href="score_lock.html"><i class="bi bi-lock"></i>Score Lock</a>
+    <a href="announce_results.html" class="active"><i class="bi bi-trophy"></i>Announce Results</a>
+    <a href="reports.html"><i class="bi bi-bar-chart"></i>Reports</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info"><div class="admin-avatar" id="admin-avatar">A</div><div><div class="admin-name" id="admin-name">Admin</div><div class="admin-role">Administrator</div></div></div>
+    <button onclick="logout()" class="btn btn-outline-light btn-sm w-100"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+  </div>
+</aside>
+<div class="admin-main">
+  <div class="admin-topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button id="sidebar-toggle"><i class="bi bi-list"></i></button>
+      <div class="page-title">Announce Results</div>
+    </div>
+  </div>
+  <div class="admin-content">
+    <!-- Step Indicator -->
+    <div class="step-indicator mb-4">
+      <div class="step-item active" id="step-1">Step 1: Select Event</div>
+      <div class="step-item" id="step-2">Step 2: Calculate</div>
+      <div class="step-item" id="step-3">Step 3: Review</div>
+      <div class="step-item" id="step-4">Step 4: Announce</div>
+    </div>
+
+    <!-- Step 1: Select Event -->
+    <div id="step-1-content">
+      <div class="card p-4 mb-4">
+        <h6 class="fw-700 mb-3"><i class="bi bi-calendar me-2 text-accent"></i>Select Event</h6>
+        <select id="event-select" class="form-select mb-3" style="max-width:500px">
+          <option value="">— Choose an event —</option>
+        </select>
+        <button class="btn btn-primary-custom" onclick="goToStep2()">
+          <i class="bi bi-arrow-right me-2"></i>Next: Calculate Results
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2 + 3: Calculate and Preview -->
+    <div id="step-2-content" style="display:none">
+      <div class="card p-4 mb-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <h6 class="fw-700 mb-0 flex-grow-1"><i class="bi bi-calculator me-2 text-accent"></i>Calculate Results</h6>
+          <button class="btn btn-outline-secondary btn-sm" onclick="backToStep1()"><i class="bi bi-arrow-left me-1"></i>Back</button>
+        </div>
+        <p class="text-muted small">Click the button below to calculate scores using the formula:</p>
+        <div class="alert alert-info small py-2">
+          <strong>Final Score = (Judge Score × Judge Weight%) + (Vote Score × Vote Weight%)</strong><br>
+          Judge scores are normalized to 100. Vote counts are normalized to 100.
+        </div>
+        <button class="btn btn-primary-custom" id="calc-btn" onclick="calculateResults()">
+          <i class="bi bi-calculator me-2"></i>Calculate Results (Preview)
+        </button>
+      </div>
+      <div id="preview-section" style="display:none">
+        <div class="card p-4 mb-4">
+          <h6 class="fw-700 mb-3"><i class="bi bi-eye me-2 text-accent"></i>Results Preview</h6>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead style="background:var(--light-bg)"><tr><th>Rank</th><th>Participant</th><th>Judge Score</th><th>Vote Score</th><th>Final Score</th></tr></thead>
+              <tbody id="preview-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card p-4" style="border:2px solid var(--gold)">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <i class="bi bi-trophy-fill fs-3 text-warning"></i>
+            <div>
+              <h6 class="fw-700 mb-0">Ready to Announce?</h6>
+              <p class="text-muted small mb-0">This will make results public to all students. This action cannot be undone!</p>
+            </div>
+          </div>
+          <button class="btn btn-gold btn-lg px-5" id="announce-btn" onclick="announceResults()">
+            <i class="bi bi-trophy me-2"></i>Announce Results Officially!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Done -->
+    <div id="step-4-content" style="display:none">
+      <div class="card p-5 text-center">
+        <div style="font-size:5rem">🎉</div>
+        <h3 class="fw-800 mt-3" style="color:var(--primary)">Results Announced!</h3>
+        <p class="text-muted">The results are now public. Students can view them in the Results section.</p>
+        <div class="d-flex gap-3 justify-content-center mt-3">
+          <a href="dashboard.html" class="btn btn-primary-custom">Back to Dashboard</a>
+          <button class="btn btn-outline-primary" onclick="location.reload()">Announce Another Event</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const user = checkAuth('admin');
+let currentEventId = null;
+
+if (user) {
+  document.getElementById('admin-name').textContent = user.full_name;
+  document.getElementById('admin-avatar').textContent = user.full_name.charAt(0);
+  fetch('../cgi-bin/get_events.py').then(r => r.json()).then(data => {
+    if (data.status === 'success') {
+      const sel = document.getElementById('event-select');
+      data.data.filter(ev => ev.status !== 'Cancelled').forEach(ev => {
+        sel.innerHTML += '<option value="' + ev.event_id + '">' + ev.title + (ev.results_announced ? ' ✓ (Announced)' : '') + '</option>';
+      });
+    }
+  });
+}
+
+function setStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('step-' + i).className = 'step-item' + (i === n ? ' active' : i < n ? ' done' : '');
+  }
+}
+
+function goToStep2() {
+  currentEventId = document.getElementById('event-select').value;
+  if (!currentEventId) { showToast('Please select an event', 'warning'); return; }
+  document.getElementById('step-1-content').style.display = 'none';
+  document.getElementById('step-2-content').style.display = 'block';
+  setStep(2);
+}
+
+function backToStep1() {
+  document.getElementById('step-1-content').style.display = 'block';
+  document.getElementById('step-2-content').style.display = 'none';
+  document.getElementById('preview-section').style.display = 'none';
+  setStep(1);
+}
+
+async function calculateResults() {
+  const btn = document.getElementById('calc-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Calculating...';
+
+  try {
+    const res = await fetch('../cgi-bin/calculate_results.py', { method: 'POST', body: new URLSearchParams({ event_id: currentEventId, announce: '0' }) });
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      setStep(3);
+      document.getElementById('preview-section').style.display = 'block';
+      document.getElementById('preview-tbody').innerHTML = data.results.map((r, i) => `
+        <tr class="${i === 0 ? 'table-warning fw-700' : ''}">
+          <td>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : r.rank}</td>
+          <td><div class="fw-600">${r.full_name}</div><small>${r.performance_title || ''}</small></td>
+          <td class="text-center">${r.judge_score.toFixed(2)}</td>
+          <td class="text-center">${r.vote_score.toFixed(2)}</td>
+          <td class="text-center fw-700">${r.final_score.toFixed(2)}</td>
+        </tr>`).join('');
+      showToast('Results calculated! Review and announce.', 'success');
+    } else {
+      showToast(data.message || 'Calculation failed', 'danger');
+    }
+  } catch(e) { showToast('Error: ' + e, 'danger'); }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="bi bi-calculator me-2"></i>Recalculate';
+}
+
+async function announceResults() {
+  if (!confirm('Announce results officially? This will make them public to all students. This CANNOT be undone!')) return;
+
+  const btn = document.getElementById('announce-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Announcing...';
+
+  try {
+    const res = await fetch('../cgi-bin/calculate_results.py', { method: 'POST', body: new URLSearchParams({ event_id: currentEventId, announce: '1' }) });
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      setStep(4);
+      document.getElementById('step-2-content').style.display = 'none';
+      document.getElementById('step-4-content').style.display = 'block';
+
+      // Fire confetti!
+      if (typeof confetti !== 'undefined') {
+        confetti({ particleCount: 200, spread: 150, origin: { y: 0.5 }, colors: ['#FFB400','#7B2FBE','#FF4D8D','#ffffff'] });
+        setTimeout(() => {
+          var end = Date.now() + 4000;
+          (function f() {
+            confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
+            confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
+            if (Date.now() < end) requestAnimationFrame(f);
+          })();
+        }, 300);
+      }
+    } else {
+      showToast(data.message, 'danger');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-trophy me-2"></i>Announce Results Officially!';
+    }
+  } catch(e) { showToast('Error: ' + e, 'danger'); btn.disabled = false; }
+}
+</script>
+</body>
+</html>
